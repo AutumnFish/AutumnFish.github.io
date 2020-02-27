@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+    <style>
+      body,
+      ul,
+      dl,
+      dd {
+        margin: 0px;
+        padding: 0px;
+      }
+
+      .wrap {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: url('images/bg.jpg') no-repeat;
+        background-size: 100% 100%;
+      }
+
+      .play_wrap {
+        width: 800px;
+        height: 544px;
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        margin-left: -400px;
+        margin-top: -272px;
+        /* background-color: #f9f9f9; */
+      }
+
+      .search_bar {
+        height: 60px;
+        background-color: #1eacda;
+        overflow: hidden;
+        border-top-left-radius: 4px;
+        border-top-right-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: relative;
+        z-index: 11;
+      }
+
+      .search_bar img {
+        margin-left: 23px;
+      }
+
+      .search_bar input {
+        margin-right: 23px;
+        width: 296px;
+        height: 34px;
+        border-radius: 17px;
+        border: 0px;
+        background: url('images/zoom.png') 265px center no-repeat
+          rgba(255, 255, 255, 0.45);
+        text-indent: 15px;
+        outline: none;
+      }
+
+      .center_con {
+        height: 435px;
+        background-color: rgba(255, 255, 255, 0.5);
+        display: flex;
+      }
+
+      .song_wrapper {
+        width: 200px;
+        height: 435px;
+        box-sizing: border-box;
+        padding: 10px;
+        list-style: none;
+        background: url('images/line.png') right center no-repeat;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .song_list li {
+        font-size: 12px;
+        color: #333;
+        line-height: 36px;
+        width: 180px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        cursor: pointer;
+      }
+
+      .song_list .active {
+        color: #da651e;
+      }
+
+      .player_con {
+        width: 400px;
+        height: 435px;
+        position: relative;
+      }
+
+      .play_bar {
+        position: absolute;
+        left: 200px;
+        top: -10px;
+        z-index: 10;
+        transform: rotate(-25deg);
+        transform-origin: 12px 12px;
+        transition: 1s;
+      }
+      .play_bar.isPlay {
+        transform: rotate(0);
+      }
+
+      .disc {
+        position: absolute;
+        left: 73px;
+        top: 60px;
+        z-index: 9;
+      }
+      .cover {
+        position: absolute;
+        left: 125px;
+        top: 112px;
+        width: 150px;
+        height: 150px;
+        border-radius: 75px;
+        z-index: 8;
+      }
+      .comment_list {
+        width: 200px;
+        height: 435px;
+        box-sizing: border-box;
+        padding: 10px;
+        list-style: none;
+        background: url('images/line.png') left center no-repeat;
+        overflow: hidden;
+        position: relative;
+      }
+      .comment_list > div {
+        /* height: 100%; */
+      }
+
+      .comment_list dl {
+        padding-left: 55px;
+        position: relative;
+        margin-bottom: 20px;
+      }
+
+      .comment_list dt {
+        position: absolute;
+        left: 4px;
+        top: 0px;
+      }
+
+      .comment_list dt img {
+        width: 40px;
+        height: 40px;
+        border-radius: 20px;
+      }
+
+      .comment_list dd {
+        font-size: 12px;
+      }
+
+      .comment_list .name {
+        font-weight: bold;
+        color: #333;
+        margin-top: 5px;
+      }
+
+      .comment_list .detail {
+        color: #666;
+        margin-top: 5px;
+        line-height: 18px;
+      }
+      .audio_con {
+        height: 50px;
+        background-color: #f1f3f4;
+        border-bottom-left-radius: 4px;
+        border-bottom-right-radius: 4px;
+      }
+      .myaudio {
+        width: 800px;
+        height: 40px;
+        margin-top: 5px;
+        outline: none;
+        background-color: #f1f3f4;
+      }
+      @keyframes Rotate {
+        from {
+          transform: rotateZ(0);
+        }
+        to {
+          transform: rotateZ(360deg);
+        }
+      }
+      .autoRotate {
+        animation-name: Rotate;
+        animation-iteration-count: infinite;
+        animation-play-state: paused;
+        animation-timing-function: linear;
+        animation-duration: 5s;
+      }
+      .playing {
+        animation-play-state: running;
+      }
+      /* vue的动画类 */
+      .list-item {
+        display: inline-block;
+        margin-right: 10px;
+      }
+      .list-enter-active,
+      .list-leave-active {
+        transition: all 1s;
+      }
+      .list-enter, .list-leave-to
+/* .list-leave-active for below version 2.1.8 */ {
+        opacity: 0;
+        transform: translateX(30px);
+      }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.1"></script>
+    <!-- 滚动 -->
+    <script src="./lib/iscroll.js"></script>
+  </head>
+
+  <body>
+    <div class="wrap">
+      <div class="play_wrap" id="player">
+        <div class="search_bar">
+          <img src="images/player_title.png" alt="" />
+          <input type="text" v-model.trim="search" @keyup.enter="searchMusic" />
+        </div>
+        <div class="center_con">
+          <div class="song_wrapper">
+            <transition-group
+              name="list"
+              tag="ul"
+              class="song_list"
+              v-on:after-enter="afterEnter"
+            >
+              <li
+                v-for="(item,index) in musicList"
+                :key="index"
+                @dblclick="playMusic(item)"
+                :style="{transitionDelay:index*10+'ms'}"
+              >
+                {{ item.name }}--{{ item.artists[0].name }}
+              </li>
+            </transition-group>
+          </div>
+          <div class="player_con">
+            <img
+              src="images/player_bar.png"
+              class="play_bar"
+              :class="{isPlay:isPlay}"
+            />
+            <!-- 黑胶碟片 -->
+            <img
+              src="images/disc.png"
+              class="disc autoRotate"
+              :class="{playing:isPlay}"
+            />
+            <img
+              :src="picUrl?picUrl:'./images/cover.png'"
+              class="cover autoRotate"
+              :class="{playing:isPlay}"
+            />
+          </div>
+          <div class="comment_list">
+            <div>
+              <dl v-for="(item,index) in commentList" :key="index">
+                <dt><img :src="item.user.avatarUrl" alt="" /></dt>
+                <dd class="name">{{ item.user.nickname }}</dd>
+                <dd class="detail">{{ item.content }}</dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+        <div class="audio_con">
+          <audio
+            :src="musicUrl"
+            controls
+            autoplay
+            loop
+            @play="play"
+            @pause="pause"
+            class="myaudio"
+          ></audio>
+        </div>
+      </div>
+    </div>
+
+    <script type="text/javascript">
+      let app = new Vue({
+        el: '#player',
+        data: {
+          // 搜索内容
+          search: '',
+          // 歌曲列表
+          musicList: [],
+          // 歌曲地址
+          musicUrl: '',
+          // 歌曲封面url
+          picUrl: '',
+          // 是否播放
+          isPlay: false,
+          // 评论数组
+          commentList: [],
+          // mvUrl
+          mvUrl: '',
+          // 滚动
+          myScroll: undefined,
+          // 左边滚动
+          leftScroll: undefined
+        },
+
+        mounted() {
+          this.myScroll = new IScroll('.comment_list', {
+            mouseWheel: true,
+            scrollbars: true
+          })
+          this.leftScroll = new IScroll('.song_wrapper', {
+            mouseWheel: true
+          })
+        },
+        updated() {
+          this.myScroll.refresh()
+          this.leftScroll.refresh()
+        },
+        methods: {
+          // 动画钩子
+          afterEnter(e) {
+            e.style = ''
+          },
+          searchMusic() {
+            // 清空数组
+            this.musicList = []
+            this.$http
+              .get('https://autumnfish.cn/search?keywords=' + this.search)
+              .then(
+                res => {
+                  // 赋值歌曲数据
+                  this.musicList = res.body.result.songs
+                },
+                err => {}
+              )
+          },
+          // 动画钩子
+          afterEnter(el) {
+            el.style = ''
+          },
+          // 放歌
+          playMusic(item) {
+            // 获取歌曲url
+            this.$http.get('https://autumnfish.cn/song/url?id=' + item.id).then(
+              res => {
+                // 赋值歌曲url
+                this.musicUrl = res.body.data[0].url
+              },
+              err => {}
+            )
+
+            // 获取 封面url
+            this.$http
+              .get('https://autumnfish.cn/album?id=' + item.album.id)
+              .then(
+                res => {
+                  // console.log(res);
+                  this.picUrl = res.body.album.picUrl
+                },
+                err => {}
+              )
+
+            // 获取评论
+            this.$http
+              .get('https://autumnfish.cn/comment/hot?type=0&id=' + item.id)
+              .then(
+                res => {
+                  // console.log(res)
+                  this.commentList = res.body.hotComments
+                },
+                err => {}
+              )
+            // 获取mv
+            this.$http.get('https://autumnfish.cn/mv/url?id=' + item.mvid).then(
+              res => {
+                // console.log(res);
+                this.mvUrl = res.body.data.url
+              },
+              err => {}
+            )
+          },
+          // 歌曲播放
+          play() {
+            console.log('play')
+            this.isPlay = true
+          },
+          // 歌曲暂停
+          pause() {
+            console.log('pause')
+            this.isPlay = false
+          }
+        }
+      })
+    </script>
+  </body>
+</html>
