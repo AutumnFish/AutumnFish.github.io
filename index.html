@@ -1,14 +1,54 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8">
+  <title>今日笑话</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
-<body>
-    <h2>花姐的主页</h2>
-    <a href="./webmusic/index.html">音乐播放器</a>
-    <br>
-    <a href="./yuemusic//index.html">悦听播放器</a>
+<body class="bg-gradient-to-br from-teal-50 via-green-50 to-blue-100 min-h-screen flex flex-col items-center py-12">
+  <div class="w-full max-w-xl bg-white/80 rounded-2xl shadow-lg p-8 flex flex-col items-center">
+    <h1 class="text-3xl font-bold text-teal-600 mb-6 flex items-center gap-2">
+      <i class="fa-regular fa-face-laugh-beam"></i>
+      今日笑话
+    </h1>
+    <div class="flex gap-4 mb-8">
+      <button id="singleJokeBtn" class="flex items-center gap-2 px-6 py-2 rounded-full bg-teal-100 text-teal-700 hover:bg-teal-200 transition shadow">
+        <i class="fa-solid fa-dice-one"></i>
+        随机一条
+      </button>
+    </div>
+    <!-- 单条笑话展示区 -->
+    <div class="w-full mb-6">
+      <div id="singleJoke" class="bg-white rounded-xl shadow p-5 text-gray-700 text-lg leading-relaxed min-h-[60px] flex items-center">
+        这里显示一条随机笑话
+      </div>
+    </div>
+  </div>
+  <footer class="mt-10 text-gray-400 text-sm">
+    <i class="fa-regular fa-copyright"></i> 2024 笑话小站
+  </footer>
+  <script>
+    // 获取 DOM 元素
+    const singleJokeBtn = document.getElementById('singleJokeBtn');
+    const singleJokeDiv = document.getElementById('singleJoke');
+
+    // 获取一条随机笑话
+    async function fetchSingleJoke() {
+      singleJokeDiv.textContent = '加载中...';
+      try {
+        const res = await fetch('https://api-vue-base.itheima.net/api/joke');
+        const text = await res.text();
+        singleJokeDiv.textContent = text || '获取失败，请重试';
+      } catch (e) {
+        singleJokeDiv.textContent = '获取失败，请检查网络';
+      }
+    }
+
+    singleJokeBtn.addEventListener('click', fetchSingleJoke);
+  </script>
 </body>
 </html>
